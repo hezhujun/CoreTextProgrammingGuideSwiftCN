@@ -99,3 +99,48 @@ CFAttributedStringSetAttribute(attrString, range, kCTKernAttributeName, NSNumber
 **清单 3-9** 展示了如何获取具有单一字体的字符串中的字符的字形。大多数情况下，您应该只使用 CTLine 对象来获取此信息，因为一种字体可能无法编码整个字符串。此外，简单的字符到字形的映射不会为复杂的脚本获得正确的外观。如果您尝试为字体显示特定的 Unicode 字符，这种简单的字形映射可能是合适的。
 
 // TODO
+
+## 使用导入字体
+
+使用导入字体有两种方式，第一种是把字体文件注册到系统，通过名字来创建字体描述符，第二种是加载字体文件创建字体描述符。
+
+**清单 3-10** 注册字体
+```swift
+// scrop 表示字体注册后的生命周期
+CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+
+// 通过名字创建字体对象
+let name: String = "..."
+let font = UIFont(name: name, size: 15)
+```
+
+**清单 3-11** 注销字体
+```swift
+CTFontManagerUnregisterFontsForURL(url as CFURL, .process, nil)
+```
+
+**清单 3-12** 加载字体文件创建字体描述符
+
+```swift
+// 通过字体文件 url 创建 CTFontDescriptor
+guard let fontDescriptors = CTFontManagerCreateFontDescriptorsFromURL(url as CFURL) as? [CTFontDescriptor] else {
+    return
+}
+// 打印字体信息
+fontDescriptors.forEach { descriptor in
+    guard let attributes = CTFontDescriptorCopyAttributes(descriptor) as? [NSString: Any] else {
+        return
+    }
+    for (key, value) in attributes {
+        print("\(key): \(value)")
+    }
+}
+
+guard let descriptor = fontDescriptors.first else { return }
+guard let attributes = CTFontDescriptorCopyAttributes(descriptor) as? [NSString: Any],
+        let name = attributes[kCTFontNameAttribute] as? NSString else {
+    return
+}
+// 通过 fontDescriptor 创建 CTFont
+let font = CTFontCreateWithFontDescriptor(descriptor, 15, nil)
+```
