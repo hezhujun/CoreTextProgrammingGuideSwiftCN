@@ -76,14 +76,41 @@ func createFontConvertedToFamily(font: CTFont, family: String) -> CTFont? {
 ## 序列化字体
 
 **清单 3-6** 展示了如何创建 XML 数据来序列化可嵌入文档中的字体。或者，最好使用 NSArchiver。这只是完成此任务的一种方法，但它保留了以后重新创建确切字体所需的字体中的所有数据。
+```swift
+let descriptor = CTFontCopyFontDescriptor(font)
+let attributes = CTFontDescriptorCopyAttributes(descriptor)
 
-// TODO
+var cfError: CFError! = CFErrorCreate(nil, "com.hezhujun.ios.CommonFontOperations" as CFErrorDomain, 0, nil)
+var unmanagedError: Unmanaged<CFError>? = Unmanaged.passUnretained(cfError)
+let data: NSData? = withUnsafeMutablePointer(to: &unmanagedError) { error in
+    if CFPropertyListIsValid(attributes, .xmlFormat_v1_0) {
+        let unmanagedData: Unmanaged<CFData>! = CFPropertyListCreateData(kCFAllocatorDefault, attributes, .xmlFormat_v1_0, .zero, error)
+        let data: NSData = unmanagedData.takeRetainedValue() as NSData
+        if let xmlString = NSString(data: data as Data, encoding: String.Encoding.utf8.rawValue) {
+            print("createFlattenedFontData: xml data \n\(xmlString)")
+        } else {
+            print("createFlattenedFontData: convert data to string error!")
+        }
+        return data
+    } else {
+        return nil
+    }
+}
+```
 
 ## 从序列化数据创建字体
 
 **清单 3-7** 展示了如何从展平的 XML 数据创建字体引用。它展示了如何展开字体属性并使用这些属性创建字体。
 
-// TODO
+```swift
+var format = CFPropertyListFormat.xmlFormat_v1_0
+let font: CTFont? = withUnsafeMutablePointer(to: &format) { format in
+    let unmanagedPropertyList: Unmanaged<CFPropertyList>! = CFPropertyListCreateWithData(nil, data, CFPropertyListMutabilityOptions.mutableContainersAndLeaves.rawValue, format, nil)
+    let attributes = unmanagedPropertyList.takeRetainedValue() as! CFDictionary
+    let descriptor = CTFontDescriptorCreateWithAttributes(attributes)
+    let font = CTFontCreateWithFontDescriptor(descriptor, 0, nil)
+}
+```
 
 ## 更改字距
 
@@ -98,7 +125,14 @@ CFAttributedStringSetAttribute(attrString, range, kCTKernAttributeName, NSNumber
 
 **清单 3-9** 展示了如何获取具有单一字体的字符串中的字符的字形。大多数情况下，您应该只使用 CTLine 对象来获取此信息，因为一种字体可能无法编码整个字符串。此外，简单的字符到字形的映射不会为复杂的脚本获得正确的外观。如果您尝试为字体显示特定的 Unicode 字符，这种简单的字形映射可能是合适的。
 
-// TODO
+```swift
+let count = CFStringGetLength(string as CFString)
+var characters = UnsafeMutableBufferPointer<UniChar>.allocate(capacity: count)
+var glyhps = UnsafeMutableBufferPointer<CGGlyph>.allocate(capacity: count)
+
+CFStringGetCharacters(string as CFString, CFRangeMake(0, count), characters.baseAddress)
+CTFontGetGlyphsForCharacters(font, characters.baseAddress!, glyhps.baseAddress!, count)
+```
 
 ## 使用导入字体
 
