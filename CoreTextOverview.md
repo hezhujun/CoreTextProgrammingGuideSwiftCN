@@ -39,7 +39,7 @@ Core Text 对象在运行时形成一个层次结构，如图 1-1 所示。此�
 
 每个 CTFrame 对象都包含段落的 line (`CTLine`) 对象。每个 line 对象代表一行文本。 CTFrame 对象可能只包含一个长的 CTLine 对象，也可能包含一组 lines。line 对象是由排版人员在框架设置操作期间创建的，并且与 frame 一样，可以将自己直接绘制到图形上下文中。
 
-每个 CTLine 对象都包含一组 glyph run (`CTRun`) 对象。Glyph run 是一组共享相同属性和方向的连续字形。typesetter 创建 glyph run，因为它从字符串、属性和字体对象生成 line。这意味着一条 line 由一个或多个 glyph run 构成。如果需要，glyph run 可以将自己绘制到图形上下文中，尽管大多数客户端不需要直接与字形运行交互。
+每个 CTLine 对象都包含一组 glyph run (`CTRun`) 对象。Glyph run 是一组共享相同属性和方向的连续字形。typesetter 创建 glyph run，因为它从字符串、属性和字体对象生成行。这意味着一行由一个或多个 glyph run 构成。如果需要，glyph run 可以将自己绘制到图形上下文中，尽管大多数客户端不需要直接与字形运行交互。
 
 ### 字体对象
 

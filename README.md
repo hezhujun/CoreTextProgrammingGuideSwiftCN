@@ -4,6 +4,6 @@
 
 - [简介](Introduction.md)
 - [概述](CoreTextOverview.md)
-- 通用文本布局操作
+- [常用文本布局操作](CommonTextLayoutOperations.md)
 - [常用字体操作](CommonFontOperations.md)
 
